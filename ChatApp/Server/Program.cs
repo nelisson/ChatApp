@@ -1,4 +1,5 @@
 using ChatApp.Server.Data;
+using ChatApp.Server.Hubs;
 using ChatApp.Server.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -51,6 +52,7 @@ app.UseRouting();
 app.UseIdentityServer();
 app.UseAuthorization();
 
+app.MapHub<ChatHub>("/chatHub");
 
 app.MapRazorPages();
 app.MapControllers();
