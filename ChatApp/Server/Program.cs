@@ -52,7 +52,7 @@ app.UseRouting();
 app.UseIdentityServer();
 app.UseAuthorization();
 
-app.MapHub<ChatHub>("/chatHub");
+app.MapHub<ChatHub>("/chathub");
 
 app.MapRazorPages();
 app.MapControllers();
