@@ -33,14 +33,14 @@
             @foreach (var chatroom in chatrooms)
             {
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="">
+                <NavLink class="nav-link" href="@($"/chat/{chatroom.Id}")" Match="NavLinkMatch.All">
                     @chatroom.Name
                 </NavLink>
             </div>
             }       
         }
         <div class="nav-item px-3">
-            <button class="btn btn-primary"><span class="oi oi-plus" aria-hidden="true"></span>NEW ROOM</button>
+            <button class="btn btn-primary" @onclick="CreateChatroom"><span class="oi oi-plus" aria-hidden="true"></span>NEW ROOM</button>
         </div>
     </nav>    
 </div>
@@ -50,13 +50,32 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await ListChatroom();
+    }
+
+    private async void CreateChatroom()
+    {
+        var response = await Http.PostAsync("Chatroom", null);
+
+        if (response.IsSuccessStatusCode)
+        {
+            await ListChatroom();
+        }
+    }
+
+    private async Task ListChatroom()
+    {
         try
         {
+            chatrooms = null;
+            StateHasChanged();
             chatrooms = await Http.GetFromJsonAsync<Chatroom[]>("Chatroom");
+            StateHasChanged();
         }
         catch (AccessTokenNotAvailableException exception)
         {
             exception.Redirect();
         }
     }
+
 }
