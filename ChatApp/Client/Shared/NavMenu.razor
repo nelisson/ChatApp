@@ -1,4 +1,11 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using ChatApp.Shared.Model;
+@using static System.Net.WebRequestMethods;
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@attribute [Authorize]
+@inject HttpClient Http
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">ChatApp</a>
         <button title="Navigation menu" class="navbar-toggler">
@@ -9,26 +16,29 @@
 
 <div class="nav-scrollable">
     <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="chat">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Chat
-            </NavLink>
-        </div>
+        @if (chatrooms == null)
+        {
+            <div class="nav-item px-3">
+                <p style="color:white"><em>Loading...</em></p>
+            </div>
+            
+        }
+        else{
+            @if(chatrooms.Count() == 0)
+            {
+                <div class="nav-item px-3">
+                    <p style="color:white"><em>No chatroom available</em></p>
+                </div>
+            }
+            @foreach (var chatroom in chatrooms)
+            {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="">
+                    @chatroom.Name
+                </NavLink>
+            </div>
+            }       
+        }
         <div class="nav-item px-3">
             <button class="btn btn-primary"><span class="oi oi-plus" aria-hidden="true"></span>NEW ROOM</button>
         </div>
@@ -36,5 +46,17 @@
 </div>
 
 @code {
+    private Chatroom[]? chatrooms;
 
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            chatrooms = await Http.GetFromJsonAsync<Chatroom[]>("Chatroom");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
 }

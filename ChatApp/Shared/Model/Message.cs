@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNet.Identity.EntityFramework;
-
-namespace ChatApp.Shared.Model
+﻿namespace ChatApp.Shared.Model
 {
     public class Message
     {
