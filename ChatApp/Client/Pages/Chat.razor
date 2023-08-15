@@ -1,13 +1,29 @@
 ﻿@page "/chat"
 @implements IAsyncDisposable
+@attribute [Authorize]
 @inject NavigationManager NavigationManager
+@inject IAccessTokenProvider TokenProvider
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 @using Microsoft.AspNetCore.SignalR.Client;
+@using Microsoft.AspNetCore.Components.Authorization
 
 <PageTitle>Chat</PageTitle>
 
+
+
 <h1>Chat</h1>
 
-<button class="btn btn-primary" @onclick="Send">Send Message</button>
+@if (IsConnected)
+{
+    <input @bind="userInput" placeholder="Type your message" />
+    <button @onclick="() => Send(userInput)">Enviar</button>
+}
+else
+{
+    <p>Connecting...</p>
+}
 
 <ul id="messagesList">
     @foreach (var message in messages)
@@ -19,28 +35,48 @@
 @code {
     private HubConnection? hubConnection;
     private List<string> messages = new List<string>();
-    private int counte = 0;
+    private string userInput = "";
+    private string username = "";
 
     protected override async Task OnInitializedAsync()
     {
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
-            .Build();
+        var tokenResult = await TokenProvider.RequestAccessToken();
 
-        hubConnection.On<int, string, string>("ReceiveMessage", (chatroomId, username, message) =>
+        if (tokenResult.TryGetToken(out var token))
         {
-            messages.Add($"message {counte++}");
-            StateHasChanged();
-        });
+            var accessToken = token.Value;
 
-        await hubConnection.StartAsync();
+            hubConnection = new HubConnectionBuilder()
+           .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"), options =>
+           {
+               options.AccessTokenProvider = () => Task.FromResult<string?>(accessToken);
+           })
+           .Build();
+
+            hubConnection.On<int, string, string>("ReceiveMessage", (chatroomId, username, message) =>
+            {
+                messages.Add($"{username}: {message}");
+                StateHasChanged();
+            });
+
+            await hubConnection.StartAsync();
+        }
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            username = user.Identity.Name;
+        }
     }
 
-    public async Task Send()
+    public async Task Send(string message)
     {
         if (hubConnection?.State == HubConnectionState.Connected)
-        {
-            await hubConnection.SendAsync("SendMessage", 1,"Teste");
+        {   
+            await hubConnection.SendAsync("SendMessage", 1, username, message);
+            userInput = "";
         }
     }
 

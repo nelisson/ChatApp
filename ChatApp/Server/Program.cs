@@ -1,7 +1,9 @@
 using ChatApp.Server.Data;
 using ChatApp.Server.Hubs;
 using ChatApp.Server.Models;
+using Duende.IdentityServer.Configuration;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 

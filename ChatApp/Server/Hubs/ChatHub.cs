@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ChatApp.Server.Hubs
 {
+    [Authorize]
     public class ChatHub : Hub
     {
-        public async Task SendMessage(int chatroomId, string message)
+        public async Task SendMessage(int chatroomId, string userId, string message)
         {
-            await Clients.All.SendAsync("ReceiveMessage", chatroomId, Context.User?.Identity?.Name, message);
+            await Clients.All.SendAsync("ReceiveMessage", chatroomId, userId, message);
         }
     }
 }
