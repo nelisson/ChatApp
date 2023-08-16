@@ -41,7 +41,18 @@ namespace ChatApp.Server.Services
             using var reader = new StreamReader(await response.Content.ReadAsStreamAsync());
             using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
 
-            return await csv.GetRecordsAsync<StockRecord>().ToListAsync();
+            List<StockRecord> stockRecords;
+
+            try
+            {
+                stockRecords = await csv.GetRecordsAsync<StockRecord>().ToListAsync();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            
+            return stockRecords;
         }
 
         private static string FormatStockMessage(StockRecord stockRecord)
