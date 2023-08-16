@@ -22,7 +22,7 @@ namespace ChatApp.Server.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Chatroom>> GetChatrooms()
         {
-            return _chatroomService.GetChatrooms().ToList();
+            return Ok(_chatroomService.GetChatrooms());
         }
 
         // POST: api/Chatroom

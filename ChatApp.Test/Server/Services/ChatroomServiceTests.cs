@@ -3,7 +3,7 @@ using ChatApp.Shared.Model;
 using Moq;
 using Microsoft.EntityFrameworkCore;
 
-namespace ChatApp.Tests.Services
+namespace ChatApp.Test.Server.Services
 {
     public class ChatroomServiceTests
     {
