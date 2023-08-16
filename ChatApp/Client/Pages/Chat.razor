@@ -5,6 +5,8 @@
 @inject IAccessTokenProvider TokenProvider
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject HttpClient Http
+@inject IHubConnectionFactory HubConnectionFactory
+@using ChatApp.Client.HubConnectionClient;
 @using ChatApp.Shared.Model
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
@@ -58,13 +60,9 @@ else
         if (tokenResult.TryGetToken(out var token))
         {
             var accessToken = token.Value;
+            var url = NavigationManager.ToAbsoluteUri("/chathub").ToString();
 
-            hubConnection = new HubConnectionBuilder()
-                .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"), options =>
-                {
-                    options.AccessTokenProvider = () => Task.FromResult<string?>(accessToken);
-                })
-                .Build();
+            hubConnection = await HubConnectionFactory.CreateConnectionAsync(url, accessToken);
 
             hubConnection.On<int>("ReceiveMessage", async (chatroomId) =>
             {
@@ -73,8 +71,6 @@ else
                     await LoadMessages();
                 }
             });
-
-            await hubConnection.StartAsync();
         }
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();

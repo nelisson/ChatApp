@@ -1,5 +1,6 @@
 using ChatApp.Server.Data;
 using ChatApp.Server.Hubs;
+using ChatApp.Server.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,10 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
 builder.Services.AddSignalR();
+
+builder.Services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
+builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IChatroomService, ChatroomService>();
 
 var app = builder.Build();
 

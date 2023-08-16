@@ -16,11 +16,33 @@
 
 <div class="nav-scrollable">
     <nav class="flex-column">
-        @RenderChatrooms()
+        @if (chatrooms == null)
+        {
+            <div class="nav-item px-3">
+                <p style="color:white"><em>Loading...</em></p>
+            </div>
+            
+        }
+        else{
+            @if(chatrooms.Count() == 0)
+            {
+                <div class="nav-item px-3">
+                    <p style="color:white"><em>No chatroom available</em></p>
+                </div>
+            }
+            @foreach (var chatroom in chatrooms)
+            {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="@($"/chat/{chatroom.Id}")" Match="NavLinkMatch.All">
+                    @chatroom.Name
+                </NavLink>
+            </div>
+            }       
+        }
         <div class="nav-item px-3">
             <button class="btn btn-primary" @onclick="CreateChatroom"><span class="oi oi-plus" aria-hidden="true"></span>NEW ROOM</button>
         </div>
-    </nav>
+    </nav>    
 </div>
 
 @code {
@@ -28,20 +50,20 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await ListChatrooms();
+        await ListChatroom();
     }
 
-    private async Task CreateChatroom()
+    private async void CreateChatroom()
     {
         var response = await Http.PostAsync("Chatroom", null);
 
         if (response.IsSuccessStatusCode)
         {
-            await ListChatrooms();
+            await ListChatroom();
         }
     }
 
-    private async Task ListChatrooms()
+    private async Task ListChatroom()
     {
         try
         {
@@ -56,33 +78,4 @@
         }
     }
 
-    private RenderFragment RenderChatrooms()
-    {
-        return builder =>
-        {
-            if (chatrooms == null)
-            {
-                builder.AddContent(0, "Loading...");
-            }
-            else if (chatrooms.Length == 0)
-            {
-                builder.AddContent(1, "No chatroom available");
-            }
-            else
-            {
-                foreach (var chatroom in chatrooms)
-                {
-                    builder.OpenElement(2, "div");
-                    builder.AddAttribute(3, "class", "nav-item px-3");
-                    builder.OpenComponent<NavLink>(4);
-                    builder.AddAttribute(5, "class", "nav-link");
-                    builder.AddAttribute(6, "href", $"/chat/{chatroom.Id}");
-                    builder.AddAttribute(7, "Match", NavLinkMatch.All);
-                    builder.AddContent(8, chatroom.Name);
-                    builder.CloseComponent();
-                    builder.CloseElement();
-                }
-            }
-        };
-    }
 }
