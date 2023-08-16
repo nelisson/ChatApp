@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace ChatApp.Server.Data
 {
-    public class ApplicationDbContext : ApiAuthorizationDbContext<IdentityUser>
+    public class ApplicationDbContext : ApiAuthorizationDbContext<IdentityUser>, IApplicationDbContext
     {
         public ApplicationDbContext(
             DbContextOptions options,
@@ -17,5 +17,10 @@ namespace ChatApp.Server.Data
 
         public DbSet<Chatroom> Chatrooms { get; set; }
         public DbSet<Message> Messages { get; set; }
+
+        public Task<int> SaveChangesAsync()
+        {
+            return base.SaveChangesAsync();
+        }
     }
 }

@@ -1,21 +1,27 @@
-﻿using ChatApp.Server.Data;
-using ChatApp.Shared.Model;
+﻿using ChatApp.Shared.Model;
 
 namespace ChatApp.Server.Services
 {
     public class MessageService : IMessageService
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IApplicationDbContext _dbContext;
 
-        public MessageService(ApplicationDbContext dbContext)
+        public MessageService(IApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public async Task SaveMessageAsync(Message message)
+        public Task<int> SaveMessageAsync(Message message)
         {
             _dbContext.Messages.Add(message);
-            await _dbContext.SaveChangesAsync();
+            return _dbContext.SaveChangesAsync();
+        }
+
+        public List<Message> GetMessages(int chatroomId)
+        {
+            return _dbContext.Messages
+                .Where(m => m.ChatroomId == chatroomId)
+                .ToList();
         }
     }
 }

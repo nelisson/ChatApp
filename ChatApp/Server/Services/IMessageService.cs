@@ -4,6 +4,7 @@ namespace ChatApp.Server.Services
 {
     public interface IMessageService
     {
-        Task SaveMessageAsync(Message message);
+        Task<int> SaveMessageAsync(Message message);
+        List<Message> GetMessages(int chatroomId);
     }
 }
