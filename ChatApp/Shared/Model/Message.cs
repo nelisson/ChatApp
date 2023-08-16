@@ -7,6 +7,5 @@
         public DateTime Timestamp { get; set; }
         public required string Content { get; set; }
         public int ChatroomId { get; set; }
-        public required virtual Chatroom Chatroom { get; set; }
     }
 }

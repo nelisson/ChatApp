@@ -4,6 +4,8 @@
 @inject NavigationManager NavigationManager
 @inject IAccessTokenProvider TokenProvider
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient Http
+@using ChatApp.Shared.Model;
 @using Microsoft.AspNetCore.Authorization;
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 @using Microsoft.AspNetCore.SignalR.Client;
@@ -60,10 +62,12 @@ else
            })
            .Build();
 
-            hubConnection.On<int, string, string>("ReceiveMessage", (chatroomId, username, message) =>
+            hubConnection.On<int>("ReceiveMessage", async (chatroomId) =>
             {
-                messages.Add($"{username}: {message}");
-                StateHasChanged();
+                if (chatroomId.ToString() == ChatroomId)
+                {
+                    await LoadMessages();
+                }
             });
 
             await hubConnection.StartAsync();
@@ -76,12 +80,35 @@ else
         {
             username = user.Identity.Name;
         }
+
+        await LoadMessages();
+    }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadMessages();
+    }
+
+    private async Task LoadMessages()
+    {
+        var url = $"Message/list/{ChatroomId}";
+
+        var responseMessages = await Http.GetFromJsonAsync<Message[]>(url);
+        messages.Clear();
+
+        foreach (var message in responseMessages)
+        {            
+            messages.Add($"{message.Timestamp} {message.UserId}:{message.Content}");
+        }
+
+        StateHasChanged();
     }
 
     public async Task Send(string message)
     {
         if (hubConnection?.State == HubConnectionState.Connected)
-        {   
+        {       
             await hubConnection.SendAsync("SendMessage", int.Parse(ChatroomId), username, message);
             userInput = "";
         }
