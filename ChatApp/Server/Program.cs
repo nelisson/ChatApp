@@ -29,6 +29,12 @@ builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
 builder.Services.AddHttpClient();
 
+string rabbitMqUri = "amqps://hvfpkgbx:FmqZDeK0YfU1vmIXEjy1aOgrgAM056Vb@jackal.rmq.cloudamqp.com/hvfpkgbx";
+string rabbitMqQueue = "stockMessages";
+
+builder.Services.AddSingleton<IRabbitMqService>(new RabbitMqService(rabbitMqUri, rabbitMqQueue));
+
+
 builder.Services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
 builder.Services.AddScoped<ICommandDetectionService, CommandDetectionService>();
 builder.Services.AddScoped<IBotService, BotService>();

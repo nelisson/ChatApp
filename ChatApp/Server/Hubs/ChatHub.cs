@@ -12,15 +12,32 @@ namespace ChatApp.Server.Hubs
         private readonly IMessageService _messageService;
         private readonly ICommandDetectionService _commandDetectionService;
         private readonly IBotService _botService;
+        private readonly IRabbitMqService _rabbitMqService;
+        private readonly IHubContext<ChatHub> _hubContext;
 
-        public ChatHub(IMessageService messageService, ICommandDetectionService commandDetectionService, IBotService botService)
+        public ChatHub(IMessageService messageService, ICommandDetectionService commandDetectionService, IBotService botService, IRabbitMqService rabbitMqService, IHubContext<ChatHub> hubContext)
         {
             _messageService = messageService;
             _commandDetectionService = commandDetectionService;
             _botService = botService;
+            _rabbitMqService = rabbitMqService;
+            _hubContext = hubContext;
+
+            string rabbitMqQueue = "stockMessages";
+            _rabbitMqService.RegisterConsumer(rabbitMqQueue, ProcessReceivedMessage);            
         }
 
-        
+        private async void ProcessReceivedMessage(string message)
+        {
+            var splitMessage = message.Split("@@@");
+            int chatroomId = int.Parse(splitMessage[0]);
+            string stockMessage = splitMessage[1];
+
+            // Processar e enviar a mensagem para o cliente usando o método SendAsync
+            await _hubContext.Clients.All.SendAsync("ReceiveStockMessage", chatroomId, $"<i>{DateTime.Now}</i> <strong>Stock Bot</strong>: {stockMessage}");
+        }
+
+
         public async Task SendMessage(int chatroomId, string userId, string message)
         {
             var commando = _commandDetectionService.DetectCommand(message);

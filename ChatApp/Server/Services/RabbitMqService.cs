@@ -1,4 +1,5 @@
 ﻿using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System.Text;
 
 namespace ChatApp.Server.Services
@@ -28,6 +29,18 @@ namespace ChatApp.Server.Services
                                   routingKey: routingKey,
                                   basicProperties: null,
                                   body: body);
+        }
+
+        public void RegisterConsumer(string queue, Action<string> messageReceivedCallback)
+        {
+            var consumer = new EventingBasicConsumer(_channel);
+            consumer.Received += (model, ea) =>
+            {
+                var body = ea.Body.ToArray();
+                var message = Encoding.UTF8.GetString(body);
+                messageReceivedCallback(message);
+            };
+            _channel.BasicConsume(queue: queue, autoAck: true, consumer: consumer);
         }
 
         public void Dispose()

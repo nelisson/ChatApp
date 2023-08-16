@@ -22,7 +22,7 @@
     <ul id="messagesList">
         @foreach (var message in messages)
         {
-            <li>@message</li>
+            <li>@((MarkupString)message)</li>
         }
     </ul>
     <input @bind="userInput" placeholder="Type your message" />
@@ -71,6 +71,15 @@ else
                     await LoadMessages();
                 }
             });
+
+           hubConnection.On<int, string>("ReceiveStockMessage", (chatroomId, message) =>
+           {
+               if (chatroomId.ToString() == ChatroomId)
+               {
+                   messages.Insert(0, message);
+                   StateHasChanged();
+               }
+           });
         }
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -87,7 +96,7 @@ else
         var url = $"Message/list/{ChatroomId}";
         var responseMessages = await Http.GetFromJsonAsync<Message[]>(url);
         messages.Clear();
-        messages.AddRange(responseMessages.Select(m => $"{m.Timestamp} {m.UserId}: {m.Content}"));
+        messages.AddRange(responseMessages.Select(m => $"<i>{m.Timestamp}</i> <strong>{m.UserId}</strong>: {m.Content}"));
         StateHasChanged();
     }
 
