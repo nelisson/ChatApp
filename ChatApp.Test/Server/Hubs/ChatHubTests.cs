@@ -1,4 +1,5 @@
 ﻿using ChatApp.Server.Hubs;
+using ChatApp.Server.Models;
 using ChatApp.Server.Services;
 using ChatApp.Shared.Model;
 using Microsoft.AspNetCore.SignalR;
@@ -10,6 +11,7 @@ namespace ChatApp.Test.Server.Hubs
     {
         private readonly ChatHub _chatHub;
         private readonly Mock<IMessageService> _messageServiceMock;
+        private readonly Mock<ICommandDetectionService> _commandDetectionServiceMock;
         private readonly Mock<IHubCallerClients> _clientsMock;
         private readonly Mock<IClientProxy> _clientProxyMock;
 
@@ -18,11 +20,12 @@ namespace ChatApp.Test.Server.Hubs
             _messageServiceMock = new Mock<IMessageService>();
             _clientsMock = new Mock<IHubCallerClients>();
             _clientProxyMock = new Mock<IClientProxy>();
+            _commandDetectionServiceMock = new Mock<ICommandDetectionService>();
 
             _clientsMock.Setup(m => m.All).Returns(_clientProxyMock.Object);
             _clientProxyMock.Setup(m => m.SendCoreAsync("ReceiveMessage", It.IsAny<object[]>(), default)).Returns(Task.CompletedTask);
 
-            _chatHub = new ChatHub(_messageServiceMock.Object) { Clients = _clientsMock.Object };
+            _chatHub = new ChatHub(_messageServiceMock.Object, _commandDetectionServiceMock.Object) { Clients = _clientsMock.Object };
         }
 
         [Fact]
@@ -40,9 +43,17 @@ namespace ChatApp.Test.Server.Hubs
                 Timestamp = DateTime.Now
             };
 
+            var command = new CommandInfo
+            { 
+                IsCommand = false,
+                StockCode = string.Empty
+            };
+
             _messageServiceMock.Setup(service => service.SaveMessageAsync(It.IsAny<Message>()))
                                 .ReturnsAsync(1)
                                 .Verifiable();
+            _commandDetectionServiceMock.Setup(service => service.DetectCommand(It.IsAny<string>()))
+                                .Returns(command);
 
             // Act
             await _chatHub.SendMessage(chatroomId, userId, content);
