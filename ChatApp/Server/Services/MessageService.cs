@@ -21,6 +21,8 @@ namespace ChatApp.Server.Services
         {
             return _dbContext.Messages
                 .Where(m => m.ChatroomId == chatroomId)
+                .OrderByDescending(m => m.Timestamp)
+                .Take(50)
                 .ToList();
         }
     }

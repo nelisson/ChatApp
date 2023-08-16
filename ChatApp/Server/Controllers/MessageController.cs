@@ -1,8 +1,7 @@
-﻿using ChatApp.Server.Data;
+﻿using ChatApp.Server.Services;
 using ChatApp.Shared.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Server.Controllers
 {
@@ -11,21 +10,17 @@ namespace ChatApp.Server.Controllers
     [Route("[controller]")]
     public class MessageController : ControllerBase
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IMessageService _messageService;
 
-        public MessageController(ApplicationDbContext dbContext)
+        public MessageController(IMessageService messageService)
         {
-            _dbContext = dbContext;
+            _messageService = messageService;
         }
 
         [HttpGet("list/{chatroomId}")]
-        public async Task<ActionResult<IEnumerable<Message>>> List(int chatroomId)
+        public ActionResult<IEnumerable<Message>> List(int chatroomId)
         {
-            var messages = await _dbContext.Messages
-                .Where(m => m.ChatroomId == chatroomId)
-                .OrderByDescending(m => m.Timestamp)     
-                .Take(50)
-                .ToListAsync();
+            var messages = _messageService.GetMessages(chatroomId);
 
             return Ok(messages);
         }
