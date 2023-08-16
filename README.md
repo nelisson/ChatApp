@@ -1,4 +1,4 @@
-# README: StockChat - Chat Application with Stock Information
+# StockChat - Chat Application with Stock Information
 
 
 ## Overview
