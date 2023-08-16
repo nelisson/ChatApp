@@ -1,4 +1,4 @@
-﻿using ChatApp.Server.Data;
+﻿using ChatApp.Server.Services;
 using ChatApp.Shared.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -8,11 +8,11 @@ namespace ChatApp.Server.Hubs
     [Authorize]
     public class ChatHub : Hub
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IMessageService _messageService;
 
-        public ChatHub(ApplicationDbContext dbContext)
+        public ChatHub(IMessageService messageService)
         {
-            _dbContext = dbContext;
+            _messageService = messageService;
         }
 
         public async Task SendMessage(int chatroomId, string userId, string message)
@@ -24,8 +24,8 @@ namespace ChatApp.Server.Hubs
                 Content = message,
                 Timestamp = DateTime.Now
             };
-            _dbContext.Messages.Add(newMessage);
-            await _dbContext.SaveChangesAsync();
+
+            await _messageService.SaveMessageAsync(newMessage);
 
             await Clients.All.SendAsync("ReceiveMessage", chatroomId);
         }
