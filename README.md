@@ -60,7 +60,7 @@ dotnet test
 ## How to Use
 
 1. Open two or more browser windows and navigate to the StockChat application.
-2. Register or log in with different user credentials in each window.
+2. Register or log in with different user credentials in each window. Note: If you mark "Remember me", your account will be used in all windows from same browser.
 3. Start chatting in the chatroom and use the `/stock=stock_code` command to request stock quotes.
 4. The stock quote will be delivered as a chat message from the bot.
 
