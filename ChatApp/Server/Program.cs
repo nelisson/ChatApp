@@ -27,9 +27,11 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
 builder.Services.AddSignalR();
+builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
 builder.Services.AddScoped<ICommandDetectionService, CommandDetectionService>();
+builder.Services.AddScoped<IBotService, BotService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IChatroomService, ChatroomService>();
 
