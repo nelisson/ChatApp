@@ -1,5 +1,4 @@
-﻿using ChatApp.Server.Models;
-using ChatApp.Server.Services;
+﻿using ChatApp.Server.Services;
 using ChatApp.Shared.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -24,7 +23,7 @@ namespace ChatApp.Server.Hubs
             _hubContext = hubContext;
 
             string rabbitMqQueue = "stockMessages";
-            _rabbitMqService.RegisterConsumer(rabbitMqQueue, ProcessReceivedMessage);            
+            _rabbitMqService.RegisterConsumer(rabbitMqQueue, ProcessReceivedMessage);
         }
 
         private async void ProcessReceivedMessage(string message)
@@ -42,12 +41,13 @@ namespace ChatApp.Server.Hubs
         {
             var commando = _commandDetectionService.DetectCommand(message);
 
-            if(commando.IsCommand)
+            if (commando.IsCommand)
             {
                 var stockMessage = await _botService.ProcessStockCommand(commando.StockCode);
 
                 _botService.SendMessageToBroker(stockMessage, chatroomId);
-            }else
+            }
+            else
             {
                 var newMessage = new Message
                 {
@@ -60,7 +60,7 @@ namespace ChatApp.Server.Hubs
                 await _messageService.SaveMessageAsync(newMessage);
 
                 await Clients.All.SendAsync("ReceiveMessage", chatroomId);
-            }            
+            }
         }
     }
 }

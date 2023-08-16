@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ChatApp.Shared.Model;
+﻿using ChatApp.Shared.Model;
+using Microsoft.EntityFrameworkCore;
 
 public interface IApplicationDbContext
 {

@@ -1,7 +1,7 @@
 ﻿using ChatApp.Server.Services;
-using Moq.Protected;
-using Moq;
 using FluentAssertions;
+using Moq;
+using Moq.Protected;
 using System.Net;
 
 namespace ChatApp.Test.Server.Services
@@ -22,7 +22,7 @@ namespace ChatApp.Test.Server.Services
         {
             // Arrange
             var stockCode = "AAPL";
-            var responseContent = 
+            var responseContent =
 @"Symbol,Date,Time,Open,High,Low,Close,Volume
 AAPL,2023-08-15,16:00:00,149.99,150.44,149.49,150.03,58383274";
 

@@ -1,5 +1,4 @@
-﻿using ChatApp.Server.Data;
-using ChatApp.Server.Services;
+﻿using ChatApp.Server.Services;
 using ChatApp.Shared.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

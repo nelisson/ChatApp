@@ -19,14 +19,28 @@
 
 @if (IsConnected)
 {
-    <ul id="messagesList">
-        @foreach (var message in messages)
-        {
-            <li>@((MarkupString)message)</li>
-        }
-    </ul>
-    <input @bind="userInput" placeholder="Type your message" />
-    <button @onclick="() => Send(userInput)">Send</button>
+    <Card>
+        <CardHeader>
+            <Row>
+                <Column ColumnSize="ColumnSize.Is11">
+                    <TextEdit @bind-Text="userInput" Placeholder="Type your message" />
+                </Column>
+                <Column ColumnSize="ColumnSize.Is1">
+                    <Button Color="Color.Primary" @onclick="() => Send(userInput)">
+                        Send
+                    </Button>
+                </Column>
+            </Row>
+        </CardHeader>
+        <CardBody>
+            <ListGroup>
+                @foreach (var message in messages)
+                {
+                    <ListGroupItem>@((MarkupString)message)</ListGroupItem>
+                }
+            </ListGroup>
+        </CardBody>
+    </Card>
 }
 else
 {
@@ -35,7 +49,7 @@ else
 
 @code {
     [Parameter]
-    public string ChatroomId { get; set; }
+    public string? ChatroomId { get; set; }
 
     private HubConnection? hubConnection;
     private List<string> messages = new List<string>();
@@ -72,29 +86,30 @@ else
                 }
             });
 
-           hubConnection.On<int, string>("ReceiveStockMessage", (chatroomId, message) =>
-           {
-               if (chatroomId.ToString() == ChatroomId)
-               {
-                   messages.Insert(0, message);
-                   StateHasChanged();
-               }
-           });
+            hubConnection.On<int, string>("ReceiveStockMessage", (chatroomId, message) =>
+            {
+                if (chatroomId.ToString() == ChatroomId)
+                {
+                    messages.Insert(0, message);
+                    StateHasChanged();
+                }
+            });
         }
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        if (user.Identity.IsAuthenticated)
+        if (user?.Identity != null && user.Identity.IsAuthenticated)
         {
-            username = user.Identity.Name;
+            username = user.Identity.Name ?? string.Empty;
         }
     }
 
     private async Task LoadMessages()
     {
         var url = $"Message/list/{ChatroomId}";
-        var responseMessages = await Http.GetFromJsonAsync<Message[]>(url);
+        var responseMessages = await Http.GetFromJsonAsync<Message[]>(url) ?? new Message[] { };
+
         messages.Clear();
         messages.AddRange(responseMessages.Select(m => $"<i>{m.Timestamp}</i> <strong>{m.UserId}</strong>: {m.Content}"));
         StateHasChanged();
@@ -104,7 +119,7 @@ else
     {
         if (hubConnection?.State == HubConnectionState.Connected)
         {
-            await hubConnection.SendAsync("SendMessage", int.Parse(ChatroomId), username, message);
+            await hubConnection.SendAsync("SendMessage", int.Parse(ChatroomId ?? "1"), username, message);
             userInput = "";
         }
     }

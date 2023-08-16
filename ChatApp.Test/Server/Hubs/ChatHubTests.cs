@@ -14,6 +14,9 @@ namespace ChatApp.Test.Server.Hubs
         private readonly Mock<ICommandDetectionService> _commandDetectionServiceMock;
         private readonly Mock<IHubCallerClients> _clientsMock;
         private readonly Mock<IClientProxy> _clientProxyMock;
+        private readonly Mock<IBotService> _botServiceMock;
+        private readonly Mock<IRabbitMqService> _rabbitMqServiceMock;
+        private readonly Mock<IHubContext<ChatHub>> _hubContextMock;
 
         public ChatHubTests()
         {
@@ -21,12 +24,19 @@ namespace ChatApp.Test.Server.Hubs
             _clientsMock = new Mock<IHubCallerClients>();
             _clientProxyMock = new Mock<IClientProxy>();
             _commandDetectionServiceMock = new Mock<ICommandDetectionService>();
+            _botServiceMock = new Mock<IBotService>();
+            _rabbitMqServiceMock = new Mock<IRabbitMqService>();
+            _hubContextMock = new Mock<IHubContext<ChatHub>>();
 
             _clientsMock.Setup(m => m.All).Returns(_clientProxyMock.Object);
             _clientProxyMock.Setup(m => m.SendCoreAsync("ReceiveMessage", It.IsAny<object[]>(), default)).Returns(Task.CompletedTask);
 
-            _chatHub = new ChatHub(_messageServiceMock.Object, _commandDetectionServiceMock.Object) { Clients = _clientsMock.Object };
+            _chatHub = new ChatHub(_messageServiceMock.Object, _commandDetectionServiceMock.Object, _botServiceMock.Object, _rabbitMqServiceMock.Object, _hubContextMock.Object)
+            { Clients = _clientsMock.Object };
         }
+
+
+
 
         [Fact]
         public async Task SendMessage_Saves_Message()
@@ -44,7 +54,7 @@ namespace ChatApp.Test.Server.Hubs
             };
 
             var command = new CommandInfo
-            { 
+            {
                 IsCommand = false,
                 StockCode = string.Empty
             };

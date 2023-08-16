@@ -1,6 +1,6 @@
 ﻿using ChatApp.Server.Models;
-using CsvHelper.Configuration;
 using CsvHelper;
+using CsvHelper.Configuration;
 using System.Globalization;
 
 namespace ChatApp.Server.Services
@@ -53,7 +53,7 @@ namespace ChatApp.Server.Services
         {
             string uri = "amqps://hvfpkgbx:FmqZDeK0YfU1vmIXEjy1aOgrgAM056Vb@jackal.rmq.cloudamqp.com/hvfpkgbx";
             string queue = "stockMessages";
-            
+
             using IRabbitMqService rabbitMqService = new RabbitMqService(uri, queue);
             rabbitMqService.SendMessage($"{chatroomId}@@@{stockMessage}", queue);
         }

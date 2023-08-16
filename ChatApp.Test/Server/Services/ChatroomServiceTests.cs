@@ -1,7 +1,7 @@
 ﻿using ChatApp.Server.Services;
 using ChatApp.Shared.Model;
-using Moq;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 
 namespace ChatApp.Test.Server.Services
 {

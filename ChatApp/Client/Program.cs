@@ -1,3 +1,6 @@
+using Blazorise;
+using Blazorise.Bootstrap;
+using Blazorise.Icons.FontAwesome;
 using ChatApp.Client;
 using ChatApp.Client.HubConnectionClient;
 using Microsoft.AspNetCore.Components.Web;
@@ -17,5 +20,15 @@ builder.Services.AddScoped<IHubConnectionFactory, HubConnectionFactory>();
 
 
 builder.Services.AddApiAuthorization();
+
+builder.Services
+    .AddBlazorise(options =>
+    {
+        options.Immediate = true;
+    })
+    .AddBootstrapProviders()
+    .AddFontAwesomeIcons();
+
+
 
 await builder.Build().RunAsync();
