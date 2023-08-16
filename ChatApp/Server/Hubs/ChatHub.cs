@@ -11,11 +11,13 @@ namespace ChatApp.Server.Hubs
     {
         private readonly IMessageService _messageService;
         private readonly ICommandDetectionService _commandDetectionService;
+        private readonly IBotService _botService;
 
-        public ChatHub(IMessageService messageService, ICommandDetectionService commandDetectionService)
+        public ChatHub(IMessageService messageService, ICommandDetectionService commandDetectionService, IBotService botService)
         {
             _messageService = messageService;
             _commandDetectionService = commandDetectionService;
+            _botService = botService;
         }
 
         
@@ -25,7 +27,9 @@ namespace ChatApp.Server.Hubs
 
             if(commando.IsCommand)
             {
-                // call botservice
+                var stockMessage = await _botService.ProcessStockCommand(commando.StockCode);
+
+                _botService.SendMessageToBroker(stockMessage, chatroomId);
             }else
             {
                 var newMessage = new Message

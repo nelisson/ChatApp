@@ -48,5 +48,14 @@ namespace ChatApp.Server.Services
         {
             return $"{stockRecord.Symbol} quote is ${stockRecord.Close:0.00} per share.";
         }
+
+        public void SendMessageToBroker(string stockMessage, int chatroomId)
+        {
+            string uri = "amqps://hvfpkgbx:FmqZDeK0YfU1vmIXEjy1aOgrgAM056Vb@jackal.rmq.cloudamqp.com/hvfpkgbx";
+            string queue = "stockMessages";
+            
+            using IRabbitMqService rabbitMqService = new RabbitMqService(uri, queue);
+            rabbitMqService.SendMessage($"{chatroomId}@@@{stockMessage}", queue);
+        }
     }
 }
