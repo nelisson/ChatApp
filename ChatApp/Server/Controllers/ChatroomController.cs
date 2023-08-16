@@ -1,4 +1,5 @@
 ﻿using ChatApp.Server.Data;
+using ChatApp.Server.Services;
 using ChatApp.Shared.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,31 +11,25 @@ namespace ChatApp.Server.Controllers
     [Route("[controller]")]
     public class ChatroomController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IChatroomService _chatroomService;
 
-        public ChatroomController(ApplicationDbContext context)
+        public ChatroomController(IChatroomService chatroomService)
         {
-            _context = context;
+            _chatroomService = chatroomService;
         }
 
         // GET: api/Chatroom
         [HttpGet]
         public ActionResult<IEnumerable<Chatroom>> GetChatrooms()
         {
-            return _context.Chatrooms.ToList();
+            return _chatroomService.GetChatrooms().ToList();
         }
 
         // POST: api/Chatroom
         [HttpPost]
-        public ActionResult<Chatroom> CreateChatroom()
+        public async Task<ActionResult<Chatroom>> CreateChatroom()
         {
-            // Unique chatroom name using timestamp
-            var chatroomName = $"Chatroom_{DateTime.UtcNow:yyyyMMddHHmmssfff}";
-            var chatroom = new Chatroom { Name = chatroomName };
-
-            _context.Chatrooms.Add(chatroom);
-            _context.SaveChanges();
-
+            var chatroom = await _chatroomService.CreateChatroom();
             return CreatedAtAction("GetChatrooms", new { id = chatroom.Id }, chatroom);
         }
     }

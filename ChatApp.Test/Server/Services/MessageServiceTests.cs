@@ -7,30 +7,40 @@ namespace ChatApp.Test.Server.Services
 {
     public class MessageServiceTests
     {
-        [Fact]
-        public void GetMessages_ReturnsMessages()
+        private readonly Mock<IApplicationDbContext> _dbContextMock;
+        private readonly MessageService _messageService;
+        private readonly List<Message> _testMessages;
+
+        public MessageServiceTests()
         {
-            // Arrange
-            var mockDbSet = new Mock<DbSet<Message>>();
-            var testMessages = new List<Message>
+            _testMessages = new List<Message>
             {
                 new Message { ChatroomId = 1, UserId = "user1", Content = "Test message 1", Timestamp = DateTime.Now },
                 new Message { ChatroomId = 1, UserId = "user2", Content = "Test message 2", Timestamp = DateTime.Now },
                 new Message { ChatroomId = 2, UserId = "user3", Content = "Test message 3", Timestamp = DateTime.Now }
-            }.AsQueryable();
+            };
 
-            mockDbSet.As<IQueryable<Message>>().Setup(m => m.Provider).Returns(testMessages.Provider);
-            mockDbSet.As<IQueryable<Message>>().Setup(m => m.Expression).Returns(testMessages.Expression);
-            mockDbSet.As<IQueryable<Message>>().Setup(m => m.ElementType).Returns(testMessages.ElementType);
-            mockDbSet.As<IQueryable<Message>>().Setup(m => m.GetEnumerator()).Returns(testMessages.GetEnumerator());
+            var mockDbSet = new Mock<DbSet<Message>>();
+            var queryableTestMessages = _testMessages.AsQueryable();
 
-            var mockContext = new Mock<IApplicationDbContext>();
-            mockContext.Setup(c => c.Messages).Returns(mockDbSet.Object);
+            mockDbSet.As<IQueryable<Message>>().Setup(m => m.Provider).Returns(queryableTestMessages.Provider);
+            mockDbSet.As<IQueryable<Message>>().Setup(m => m.Expression).Returns(queryableTestMessages.Expression);
+            mockDbSet.As<IQueryable<Message>>().Setup(m => m.ElementType).Returns(queryableTestMessages.ElementType);
+            mockDbSet.As<IQueryable<Message>>().Setup(m => m.GetEnumerator()).Returns(queryableTestMessages.GetEnumerator());
 
-            var messageService = new MessageService(mockContext.Object);
+            _dbContextMock = new Mock<IApplicationDbContext>();
+            _dbContextMock.Setup(c => c.Messages).Returns(mockDbSet.Object);
+            _dbContextMock.Setup(m => m.SaveChangesAsync()).ReturnsAsync(1);
 
+
+            _messageService = new MessageService(_dbContextMock.Object);
+        }
+
+        [Fact]
+        public void GetMessages_ReturnsMessages()
+        {
             // Act
-            var messages = messageService.GetMessages(1);
+            var messages = _messageService.GetMessages(1);
 
             // Assert
             Assert.Equal(2, messages.Count);
@@ -40,24 +50,15 @@ namespace ChatApp.Test.Server.Services
         public async Task SaveMessageAsync_AddsMessageAndSavesChanges()
         {
             // Arrange
-            var message = new Message { ChatroomId = 1, UserId = "user1", Content = "Test message 1", Timestamp = DateTime.Now };
-            var messages = new List<Message>();
-            var messageSetMock = new Mock<DbSet<Message>>();
-            messageSetMock.Setup(m => m.Add(It.IsAny<Message>())).Callback<Message>(messages.Add);
-
-            var dbContextMock = new Mock<IApplicationDbContext>();
-            dbContextMock.Setup(m => m.Messages).Returns(messageSetMock.Object);
-            dbContextMock.Setup(m => m.SaveChangesAsync()).ReturnsAsync(1);
-
-            var service = new MessageService(dbContextMock.Object);
+            var newMessage = new Message { ChatroomId = 1, UserId = "user4", Content = "New test message", Timestamp = DateTime.Now };
 
             // Act
-            var result = await service.SaveMessageAsync(message);
+            var result = await _messageService.SaveMessageAsync(newMessage);
 
             // Assert
+            _dbContextMock.Verify(db => db.Messages.Add(It.IsAny<Message>()), Times.Once);
+            _dbContextMock.Verify(db => db.SaveChangesAsync(), Times.Once);
             Assert.Equal(1, result);
-            Assert.Contains(message, messages);
-            dbContextMock.Verify(m => m.SaveChangesAsync(), Times.Once);
         }
     }
 
