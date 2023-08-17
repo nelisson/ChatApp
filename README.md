@@ -43,15 +43,26 @@ dotnet restore
 cd .\ChatApp\Server\
 dotnet ef database update
 ```
-4.Run the project
+
+4. Insert RabbitMq URI
+You will receive a uri received by email, replace it in the .\ChatApp\Server\appsettings.json file.
+
+```json
+{
+  "MySettings": {
+    "RabbitMqUri": "<include the URI received by email here>"
+  }
+}
+```
+
+5.Run the project
 ```console
 cd .\ChatApp\Server\
 dotnet run
 ```
 Open a web browser and navigate to http://localhost:7234
 
-Running Tests
-
+6.Running Tests
 ```console
 cd .\ChatApp.Test
 dotnet test
